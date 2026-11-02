@@ -1,0 +1,151 @@
+{
+ "headline": "Computational linguistics · typography · human-computer interaction",
+ "contact": [
+  {
+   "label": "Tel Aviv-Yafo, Israel",
+   "url": null
+  },
+  {
+   "label": "bensapirstein.github.io",
+   "url": "https://bensapirstein.github.io/"
+  },
+  {
+   "label": "alefalif.com",
+   "url": "https://alefalif.com"
+  },
+  {
+   "label": "github.com/bensapirstein",
+   "url": "https://github.com/bensapirstein"
+  }
+ ],
+ "summary": "I explore the meeting point of computer science, linguistics, and typography. I am interested in how the visual dimension of writing can shape understanding, and I develop approaches that treat the form of text itself as a source of information. In computational historical linguistics, I study how languages evolve and relate to one another, with a focus on the Semitic family.",
+ "education": [
+  {
+   "dates": "2022 –",
+   "title": "M.Sc. Machine Learning & Data Science",
+   "place": "Reichman University, Herzliya",
+   "detail": "GPA 97/100. Thesis: SHAMS, an audio-grounded pronunciation benchmark for Levantine Arabic."
+  },
+  {
+   "dates": "2017 – 2020",
+   "title": "B.Sc. Computer Science",
+   "place": "Hebrew University of Jerusalem",
+   "detail": "GPA 91/100. Algorithms, data science, deep learning, image processing, NLP, AI."
+  }
+ ],
+ "publications": [
+  {
+   "year": "2026",
+   "title": "SHAMS: An Audio-Grounded Pronunciation Benchmark for Levantine Arabic",
+   "authors": [
+    "Ben Sapirstein",
+    "Roy Mattar",
+    "Guy Mor-Lan",
+    "Ahlam Mohamed",
+    "Letizia Cerqueglini",
+    "Morris Alper"
+   ],
+   "venue": "<i>Proceedings of the Fourth Arabic Natural Language Processing Conference (ArabicNLP @ EMNLP 2026)</i>",
+   "page_venue": "ArabicNLP 2026, co-located with EMNLP 2026",
+   "links": [
+    {
+     "label": "arXiv",
+     "url": "https://arxiv.org/abs/2610.01427"
+    },
+    {
+     "label": "Project page",
+     "url": "https://shams-nlp.github.io/"
+    },
+    {
+     "label": "Code",
+     "url": "https://github.com/bensapirstein/shams"
+    },
+    {
+     "label": "Data",
+     "url": "https://huggingface.co/datasets/shams-nlp/shams"
+    }
+   ],
+   "page": true
+  },
+  {
+   "year": "2025",
+   "title": "Standardizing Phonetic Transcriptions for Kitchen et al.'s Comparative Wordlist on Semitic Languages with Language-Specific Orthography Profiles",
+   "authors": [
+    "Ben Sapirstein"
+   ],
+   "venue": "<i>Computer-Assisted Language Comparison in Practice</i>, 8(2), 95–105",
+   "page_venue": "Computer-Assisted Language Comparison in Practice, 8(2), 95–105, 2025",
+   "links": [
+    {
+     "label": "DOI",
+     "url": "https://doi.org/10.15475/calcip.2025.2.5"
+    }
+   ],
+   "page": true
+  },
+  {
+   "year": "2025",
+   "title": "Pixels at BAREC Shared Task 2025: Visual Arabic Readability Assessment",
+   "authors": [
+    "Ben Sapirstein"
+   ],
+   "venue": "<i>Proceedings of the Third Arabic Natural Language Processing Conference: Shared Tasks</i>, 350–356",
+   "page_venue": "Proceedings of the Third Arabic Natural Language Processing Conference: Shared Tasks, 2025",
+   "links": [
+    {
+     "label": "ACL Anthology",
+     "url": "https://aclanthology.org/2025.arabicnlp-sharedtasks.48/"
+    }
+   ],
+   "page": true
+  }
+ ],
+ "teaching": [
+  {
+   "dates": "Fall 2025",
+   "title": "Teaching Assistant, Computational Thinking and Programming in Python",
+   "place": "Reichman University",
+   "detail": "Weekly tutoring for undergraduates.",
+   "page": true
+  },
+  {
+   "dates": "Fall 2025",
+   "title": "Course Assistant, Information Theory",
+   "place": "Reichman University",
+   "detail": "",
+   "page": true
+  },
+  {
+   "dates": "2020 – 2021",
+   "title": "Python Instructor",
+   "place": "Tech2Peace",
+   "detail": "Python tutor in a joint Israeli-Palestinian high-tech and peacebuilding seminar. Organized a hackathon with Madrasa in which teams built tools for teaching Palestinian dialectal Arabic to Hebrew speakers.",
+   "page": false
+  }
+ ],
+ "experience": [
+  {
+   "dates": "2024 – 2026",
+   "title": "Data Scientist",
+   "place": "Microsoft, Herzliya",
+   "detail": "Fine-tuned large language models to autonomously generate security event detectors. Designed and implemented system workflows, analyzed sample data and reasoning outputs. Azure OpenAI."
+  },
+  {
+   "dates": "2023 – 2024",
+   "title": "Algorithm Developer, Deep Learning",
+   "place": "Mobileye, Ramat Gan",
+   "detail": "Developed and trained real-time segmentation networks for autonomous vehicles, covering the pipeline from data engineering through model architecture to deployment. TensorFlow, Python, AWS, GCP."
+  },
+  {
+   "dates": "2020 – 2023",
+   "title": "Algorithm & Software Engineer, Computer Vision",
+   "place": "Corephotonics (Samsung), Tel Aviv",
+   "detail": "Built the seam-finding module for multi-image panorama and integrated it into the Corephotonics framework (C++). Optimized computer vision algorithms for multithreading and memory use."
+  }
+ ],
+ "skills": [
+  "Deep learning, computer vision, NLP · Python, C++, TensorFlow, AWS, GCP, Azure OpenAI",
+  "Linguistic data modeling, CLDF, comparative method, phonetic transcription"
+ ],
+ "languages": "Hebrew (native) · English (fluent) · French (advanced) · Arabic (intermediate)"
+}

@@ -17,8 +17,8 @@ A local static server serves it over HTTP at http://localhost:7070/web/bensapirs
 
 ## Edit
 
-- Text: edit `index.html`. Each section is marked with an `id` (`about`, `research`, `publications`, `projects`, `teaching`).
-- A new publication: copy one `<li>` in `ol.pubs` and fill the four spans (title, authors, venue, links). The list is newest first.
+- Text: edit `index.html`. Each section is marked with an `id` (`about`, `research`, `publications`, `projects`, `teaching`). About and Research interests are hand-written prose.
+- Publications and Teaching: generated from the CV data (see CV); edit the CV note, then build.
 - Design values: the variables in `:root` at the top of `style.css` (column width, colours, fonts). Dark mode follows the system setting.
 - Facts: see rule 3.
 
@@ -39,12 +39,14 @@ Self-hosted subsets, SIL OFL 1.1 (licences in `fonts/`): Inter Tight 500 and 600
 
 ## CV
 
-The header links `Ben-Sapirstein-CV.pdf`, a one-page academic CV built by `cv/build_cv.py` in the page's fonts.
+The header links `Ben-Sapirstein-CV.pdf`, a one-page academic CV in the page's fonts. The page's Publications and Teaching lists come from the same data, so the page and the PDF always agree.
 
-- Build: `python3 cv/build_cv.py` from the repo root. It needs `reportlab`, `fonttools` and `brotli`.
-- Content: the lists at the top of the script. Facts: see rule 3. The CV follows rule 1: no tool stack, no email, no phone.
-- Design values: `DESIGN` in the script (margins, sizes, colours).
-- The PDF is committed with the page. Rebuild it and commit it with every change to the script.
+- The one place to edit: Ben's private CV note (rule 3). An entry tagged for the site goes public; the note itself says how [Ben 11-02].
+- Build: `python3 cv/build_cv.py` from the repo root. It runs `cv/export.py` (the note to `cv/cv.json`), writes the PDF and the two lists in `index.html` (between the `<!-- cv:... -->` markers), then runs the data-leak check (rule 1) over every file git would publish and over the PDF. A hit stops with a list; do not commit until it is clean. It needs `reportlab`, `fonttools`, `brotli` and `pypdf`.
+- `cv/local.toml` holds the private paths of the note and of the rule list. Git ignores it. Without it, the build uses the committed `cv/cv.json` and the leak check does not run, so do not commit from such a build.
+- Never edit `cv/cv.json` or the lists between the markers by hand; the next build overwrites them.
+- Design values: `DESIGN` in `cv/build_cv.py` (margins, sizes, colours).
+- The PDF is committed with the page. Commit it with every change of the data or the script.
 
 ## Publish
 

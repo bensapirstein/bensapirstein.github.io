@@ -1,17 +1,24 @@
 """Build the academic CV PDF that the page links (Ben-Sapirstein-CV.pdf).
 
 Run from the repo root:  python3 cv/build_cv.py
-Needs: reportlab, fonttools, brotli (to read the woff2 fonts in fonts/).
+Needs: reportlab, fonttools, brotli (to read the woff2 fonts in fonts/), pypdf (the leak check reads the PDF).
 
-Facts come from Ben's private notes (the CV master and its academic selection).
-Change a fact there first, then here. This is the public version: it follows the
+It also writes the page's Publications and Teaching lists (between the
+<!-- cv:... --> markers of index.html), so the page and the PDF show the same facts.
+
+The content is cv/cv.json. cv/export.py writes it from Ben's private CV note, the
+one place he edits the CV [Ben 11-02]. This is the public version: it follows the
 page's content rule (no theory before publication) and the data-leak rule of the
-README (no tool stack, no email, no phone, no private names) [Ben 11-01]. The
-contact line names Alef Alif, the studio site, in place of Google Scholar [Ben 11-01].
+README (no tool stack, no email, no phone, no private names) [Ben 11-01]; the
+leak check stops the build on a hit.
 
 Tune the design values in DESIGN.
 """
 from pathlib import Path
+import html
+import json
+import re
+import sys
 import tempfile
 
 from fontTools.ttLib import TTFont
@@ -43,76 +50,25 @@ DESIGN = {
 }
 
 # ---------------------------------------------------------------- content
+# The content is cv/cv.json, exported from Ben's private CV note by cv/export.py.
+# Do not edit cv.json by hand: change the note, then run this script.
 NAME = "Ben Sapirstein"
-HEADLINE = "Computational linguistics · typography · human-computer interaction"
-CONTACT = [
-    ("Tel Aviv-Yafo, Israel", None),
-    ("bensapirstein.github.io", "https://bensapirstein.github.io/"),
-    ("alefalif.com", "https://alefalif.com"),
-    ("github.com/bensapirstein", "https://github.com/bensapirstein"),
-]
-# Ben's wording (LinkedIn About, kept in Bios.md).
-SUMMARY = ("I explore the meeting point of computer science, linguistics, and typography. "
-           "I am interested in how the visual dimension of writing can shape understanding, "
-           "and I develop approaches that treat the form of text itself as a source of information. "
-           "In computational historical linguistics, I study how languages evolve and relate "
-           "to one another, with a focus on the Semitic family.")
+DATA_FILE = ROOT / "cv" / "cv.json"
+PAGE = ROOT / "index.html"
 
-# (dates, title, place, detail)
-EDUCATION = [
-    ("2022 – 2026", "M.Sc. Machine Learning & Data Science", "Reichman University, Herzliya",
-     "GPA 97/100. Thesis: SHAMS, an audio-grounded pronunciation benchmark for Levantine Arabic."),
-    ("2017 – 2020", "B.Sc. Computer Science", "Hebrew University of Jerusalem",
-     "GPA 91/100. Algorithms, data science, deep learning, image processing, NLP, AI."),
-]
 
-# (year, authors, title, venue, [(label, url)])
-PUBLICATIONS = [
-    ("2026", "<b>Sapirstein, B.</b>, Mattar, R., Mor-Lan, G., Mohamed, A., Cerqueglini, L., Alper, M.",
-     "SHAMS: An Audio-Grounded Pronunciation Benchmark for Levantine Arabic.",
-     "<i>Proceedings of the Fourth Arabic Natural Language Processing Conference (ArabicNLP @ EMNLP 2026)</i>.",
-     [("arXiv:2610.01427", "https://arxiv.org/abs/2610.01427"),
-      ("shams-nlp.github.io", "https://shams-nlp.github.io/")]),
-    ("2025", "<b>Sapirstein, B.</b>",
-     "Standardizing Phonetic Transcriptions for Kitchen et al.'s Comparative Wordlist on Semitic "
-     "Languages with Language-Specific Orthography Profiles.",
-     "<i>Computer-Assisted Language Comparison in Practice</i>, 8(2), 95–105.",
-     [("doi:10.15475/calcip.2025.2.5", "https://doi.org/10.15475/calcip.2025.2.5")]),
-    ("2025", "<b>Sapirstein, B.</b>",
-     "Pixels at BAREC Shared Task 2025: Visual Arabic Readability Assessment.",
-     "<i>Proceedings of the Third Arabic Natural Language Processing Conference: Shared Tasks</i>, 350–356.",
-     [("ACL Anthology", "https://aclanthology.org/2025.arabicnlp-sharedtasks.48/")]),
-]
+def load() -> dict:
+    return json.loads(DATA_FILE.read_text(encoding="utf-8"))
 
-# Public version: only the projects the page lists; no unpublished research line [Ben 10-30].
-RESEARCH = [
-    ("SHAMS", "Levantine Arabic pronunciation benchmark: dataset, evaluation code, and project page."),
-]
 
-TEACHING = [
-    ("Fall 2025", "Teaching Assistant, Computational Thinking and Programming in Python",
-     "Reichman University", "Weekly tutoring for undergraduates."),
-    ("Fall 2025", "Course Assistant, Information Theory", "Reichman University", ""),
-    ("2020 – 2021", "Python Instructor", "Tech2Peace",
-     "Python tutor in a joint Israeli-Palestinian high-tech and peacebuilding seminar. "
-     "Organized a hackathon with Madrasa in which teams built tools for teaching Palestinian "
-     "dialectal Arabic to Hebrew speakers."),
-]
+def initials(full: str) -> str:
+    """'Guy Mor-Lan' -> 'Mor-Lan, G.'"""
+    *given, family = full.split()
+    return f"{family}, " + " ".join(f"{g[0]}." for g in given)
 
-EXPERIENCE = [
-    ("2024 – 2026", "Data Scientist", "Microsoft, Herzliya",
-     "Fine-tuned large language models to autonomously generate security event detectors. "
-     "Designed and implemented system workflows, analyzed sample data and reasoning outputs. Azure OpenAI."),
-    ("2023 – 2024", "Algorithm Developer, Deep Learning", "Mobileye, Ramat Gan",
-     "Developed and trained real-time segmentation networks for autonomous vehicles, covering the "
-     "pipeline from data engineering through model architecture to deployment. TensorFlow, Python, AWS, GCP."),
-]
 
-SKILLS = [
-    "Deep learning, computer vision, NLP · Python, C++, TensorFlow, AWS, GCP, Azure OpenAI",
-    "Linguistic data modeling, CLDF, comparative method, phonetic transcription",
-]
-LANGUAGES = "Hebrew (native) · English (fluent) · French (advanced) · Arabic (intermediate)"
+def short_url(url: str) -> str:
+    return url.split("://", 1)[-1].rstrip("/")
 
 # ---------------------------------------------------------------- fonts
 FONTS = {
@@ -139,7 +95,7 @@ def link(label: str, url: str) -> str:
     return f'<a href="{url}" color="{DESIGN["accent"]}">{label}</a>'
 
 
-def build() -> None:
+def build(cv: dict) -> None:
     d = DESIGN
     fg, muted, rule = HexColor(d["fg"]), HexColor(d["muted"]), HexColor(d["rule"])
     body_pt = d["body_pt"]
@@ -181,42 +137,36 @@ def build() -> None:
                                ("BOTTOMPADDING", (0, 0), (-1, -1), 5)]))
         return KeepTogether(t)
 
-    story = [Paragraph(NAME, st["name"]), Paragraph(HEADLINE, st["headline"]),
-             Paragraph("  ·  ".join(link(l, u) if u else l for l, u in CONTACT), st["contact"]),
-             Spacer(1, 6), Paragraph(SUMMARY, st["body"])]
+    contact = "  ·  ".join(link(html.escape(c["label"]), c["url"]) if c["url"] else html.escape(c["label"])
+                            for c in cv["contact"])
+    story = [Paragraph(NAME, st["name"]), Paragraph(cv["headline"], st["headline"]),
+             Paragraph(contact, st["contact"]), Spacer(1, 6), Paragraph(cv["summary"], st["body"])]
 
-    story.append(section("Education"))
-    for date, title, place, detail in EDUCATION:
-        story.append(row(date, Paragraph(f"<b>{title}</b>, {place}", st["body"]),
-                         Paragraph(detail, st["detail"])))
+    def dated(section_name, rows):
+        story.append(section(section_name))
+        for r in rows:
+            paras = [Paragraph(f"<b>{html.escape(r['title'])}</b>, {html.escape(r['place'])}", st["body"])]
+            if r["detail"]:
+                paras.append(Paragraph(r["detail"], st["detail"]))
+            story.append(row(r["dates"], *paras))
+
+    dated("Education", cv["education"])
 
     story.append(section("Publications"))
-    for year, authors, title, venue, links in PUBLICATIONS:
-        ls = " · ".join(link(l, u) for l, u in links)
-        story.append(row(year, Paragraph(f"{authors} <b>{title}</b> {venue}", st["body"]),
+    for p in cv["publications"]:
+        authors = ", ".join(f"<b>{initials(a)}</b>" if a == NAME else initials(a) for a in p["authors"])
+        ls = " · ".join(link(short_url(l["url"]), l["url"]) for l in p["links"])
+        story.append(row(p["year"], Paragraph(f"{authors} <b>{html.escape(p['title'])}.</b> {p['venue']}.", st["body"]),
                          Paragraph(ls, st["body"])))
 
-    story.append(section("Research"))
-    for name, line in RESEARCH:
-        story.append(row("", Paragraph(f"<b>{name}</b>. {line}", st["body"])))
-
-    story.append(section("Teaching"))
-    for date, title, place, detail in TEACHING:
-        paras = [Paragraph(f"<b>{title}</b>, {place}", st["body"])]
-        if detail:
-            paras.append(Paragraph(detail, st["detail"]))
-        story.append(row(date, *paras))
-
-    story.append(section("Experience"))
-    for date, title, place, detail in EXPERIENCE:
-        story.append(row(date, Paragraph(f"<b>{title}</b>, {place}", st["body"]),
-                         Paragraph(detail, st["detail"])))
+    dated("Teaching", cv["teaching"])
+    dated("Experience", cv["experience"])
 
     story.append(section("Skills"))
-    story.append(row("", Paragraph("<br/>".join(SKILLS), st["body"])))
+    story.append(row("", Paragraph("<br/>".join(html.escape(s) for s in cv["skills"]), st["body"])))
 
     story.append(section("Languages"))
-    story.append(row("", Paragraph(LANGUAGES, st["body"])))
+    story.append(row("", Paragraph(cv["languages"], st["body"])))
 
     m = d["margin_mm"] * mm
     doc = SimpleDocTemplate(str(OUT), pagesize=A4, leftMargin=m, rightMargin=m,
@@ -226,7 +176,70 @@ def build() -> None:
     print(OUT)
 
 
+# ---------------------------------------------------------------- the page
+def write_page(cv: dict) -> None:
+    """Write the page's Publications and Teaching lists between their markers."""
+    def e(x):
+        return html.escape(x, quote=False)
+    pubs = []
+    for p in cv["publications"]:
+        if not p["page"]:
+            continue
+        authors = ", ".join(f"<strong>{e(a)}</strong>" if a == NAME else e(a) for a in p["authors"])
+        ls = " ".join(f'<a href="{html.escape(l["url"])}">{e(l["label"])}</a>' for l in p["links"])
+        pubs.append(f"""        <li>
+          <span class="title">{e(p["title"])}</span>
+          <span class="authors">{authors}</span>
+          <span class="venue">{e(p["page_venue"])}</span>
+          <span class="pub-links">{ls}</span>
+        </li>""")
+    teach = [f"        <li>{e(t['title'])}, {e(t['place'])}, {e(t['dates'])}</li>"
+             for t in cv["teaching"] if t["page"]]
+    page = PAGE.read_text(encoding="utf-8")
+    for key, items in (("publications", pubs), ("teaching", teach)):
+        pat = re.compile(rf"(<!-- cv:{key} -->\n).*?(\n\s*<!-- /cv:{key} -->)", re.S)
+        if not pat.search(page):
+            sys.exit(f"build: the markers of {key} are missing in index.html")
+        page = pat.sub(lambda m: m.group(1) + "\n".join(items) + m.group(2), page)
+    PAGE.write_text(page, encoding="utf-8")
+    print(PAGE)
+
+
+def leak_check() -> None:
+    """The data-leak rule of the README: stop on a hit. Needs cv/local.toml."""
+    import export
+    cfg = export.local()
+    if not cfg.get("rules"):
+        print("build: no cv/local.toml; the leak check did not run")
+        return
+    terms = export.rule_terms(Path(cfg["rules"]).expanduser())
+    # Every public file: the text files git would publish, and the PDF's text and metadata.
+    import subprocess
+    listed = subprocess.run(["git", "-C", str(ROOT), "ls-files", "--cached", "--others",
+                             "--exclude-standard"], capture_output=True, text=True,
+                            env={**__import__("os").environ, "GIT_OPTIONAL_LOCKS": "0"}).stdout.split()
+    texts = {}
+    for name in listed:
+        path = ROOT / name
+        if path.suffix in {".html", ".css", ".md", ".py", ".json", ".svg", ".txt", ""} and path.is_file():
+            texts[name] = path.read_text(encoding="utf-8", errors="ignore")
+    from pypdf import PdfReader
+    pdf = PdfReader(str(OUT))
+    texts[OUT.name] = " ".join(pg.extract_text() for pg in pdf.pages) + " " + " ".join(
+        str(v) for k, v in (pdf.metadata or {}).items() if "Date" not in k)
+    hits = export.check_leaks(texts, terms, cfg.get("markers", []))
+    if hits:
+        sys.exit("build: data leak, fix the source note:\n  " + "\n  ".join(hits))
+    print(f"leak check: clean ({len(terms)} names, emails, phone numbers, private paths)")
+
+
 if __name__ == "__main__":
+    sys.path.insert(0, str(ROOT / "cv"))
+    import export
+    export.main()
+    cv = load()
+    write_page(cv)
     with tempfile.TemporaryDirectory() as tmp:
         register_fonts(Path(tmp))
-        build()
+        build(cv)
+    leak_check()
