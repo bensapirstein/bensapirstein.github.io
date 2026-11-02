@@ -223,10 +223,11 @@ def leak_check() -> None:
         path = ROOT / name
         if path.suffix in {".html", ".css", ".md", ".py", ".json", ".svg", ".txt", ""} and path.is_file():
             texts[name] = path.read_text(encoding="utf-8", errors="ignore")
-    from pypdf import PdfReader
-    pdf = PdfReader(str(OUT))
-    texts[OUT.name] = " ".join(pg.extract_text() for pg in pdf.pages) + " " + " ".join(
-        str(v) for k, v in (pdf.metadata or {}).items() if "Date" not in k)
+    if OUT.exists():
+        from pypdf import PdfReader
+        pdf = PdfReader(str(OUT))
+        texts[OUT.name] = " ".join(pg.extract_text() for pg in pdf.pages) + " " + " ".join(
+            str(v) for k, v in (pdf.metadata or {}).items() if "Date" not in k)
     hits = export.check_leaks(texts, terms, cfg.get("markers", []))
     if hits:
         sys.exit("build: data leak, fix the source note:\n  " + "\n  ".join(hits))
