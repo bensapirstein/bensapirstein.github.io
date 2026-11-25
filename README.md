@@ -1,6 +1,6 @@
 # bensapirstein.github.io
 
-Ben Sapirstein's personal academic page. One static page: `index.html`, `style.css`, `fonts/`, `assets/`. No build step, no scripts, no external requests at runtime.
+Ben Sapirstein's personal academic page. One static page: `index.html`, `style.css`, `fonts/`, `assets/`. No build step. One script and one external request at runtime: the Google Analytics tag (gtag.js, measurement ID `G-RWRB07G4DV`, added 25 Nov 2026 on Ben's request).
 
 ## Rules
 
